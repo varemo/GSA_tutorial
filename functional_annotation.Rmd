@@ -42,7 +42,11 @@ knitr::opts_chunk$set(echo = TRUE, tidy=F, eval=T, cache=F)
 qn <- sn <- 0
 ```
 
-We will use the following R packages in this exercise:
+The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip).
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` We will use the following R packages in this exercise:
 ```{r, message=FALSE, warning=FALSE, results='hide'}
 library(knitr)
 library(topGO)
@@ -50,9 +54,7 @@ library(biomaRt)
 library(piano)
 ```
 
-The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip).
-
-`r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
+If you are not able to load any of these packages, try to install them, either using `biocLite()` (first you need to run `source("http://www.bioconductor.org/biocLite.R")`) or `install.packages()`. If something fails, try to understand the error message and fix it. If you get stuck, ask for help :)  
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Start by reading in the differential expression results from the previous exercise:
 ```{r readDE}
