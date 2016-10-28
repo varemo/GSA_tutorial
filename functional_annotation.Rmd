@@ -50,7 +50,9 @@ library(biomaRt)
 library(piano)
 ```
 
-The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip)
+The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip).
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Start by reading in the differential expression results from the previous exercise:
 ```{r readDE}
