@@ -42,6 +42,9 @@ knitr::opts_chunk$set(echo = TRUE, tidy=F, eval=T, cache=F)
 qn <- sn <- 0
 ```
 
+Setup and load data 
+===================
+
 The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip).
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
@@ -247,9 +250,9 @@ showSigOfNodes(GOobj, score(resultFisher), firstSigNode=10, useInfo ='all')
 Piano
 -----
 
-Piano is an R-package for carrying out gene-set analysis (see more info [here](www.sysbio.se/piano)).
+Piano is an R-package for carrying out gene-set analysis (see more info [here](http://sysbio.se/piano)).
 
-`r sn<-sn+1; paste(sn,". ", sep="")` First we need to import some gene-sets. Load GO-terms from MSigDB:
+`r sn<-sn+1; paste(sn,". ", sep="")` First we need to import some gene-sets. Load GO-terms from [MSigDB](http://software.broadinstitute.org/gsea/msigdb/collections.jsp):
 
 ```{r}
 gscGO <- loadGSC("data/GSC/c5.bp.v5.2.symbols.gmt")
@@ -284,7 +287,9 @@ Note that multiple ENSMUS IDs still can map to the same gene symbol!
 `r sn<-sn+1; paste(sn,". ", sep="")` Extract the gene-level statistics that we will use:
 
 ```{r}
+# merge diffExpRes and bm:
 d_piano <- merge(diffExpRes, bm, by="ensembl_gene_id", all.x=T, sort=F)
+# get geneNames, pvals and logfc:
 geneNames <- d_piano$hsapiens_homolog_associated_gene_name
 pvals <- d_piano$FDR
 names(pvals) <- geneNames
@@ -293,6 +298,8 @@ names(logfc) <- geneNames
 ```
 
 > **Question `r qn<-qn+1;qn`:** How many unique mouse Ensembl IDs could we map to human orthologs? How many unique human orhtologs do we map to?  
+
+### Overrepresentation analysis
 
 First, let's use piano to perform a hypergeometric test, similar to what we did with Enrichr, DAVID, and topGO.  
 
@@ -312,6 +319,9 @@ networkPlot(res, class="non", adjusted=T, significance=0.0001, ncharLabel=Inf,
 Here, we use the `networkPlot` function which draws a network for the most significant gene-sets.
 
 > **Question `r qn<-qn+1;qn`:** What do the colors, node-sizes, and edges denote?  
+> **Question `r qn<-qn+1;qn`:** Are the results in line with those from topGO, DAVID, and Enrichr?
+
+### Gene-set analysis
 
 Next, we will use piano to perform gene-set analysis, i.e. not the enrichment of a gene-list based on a cut-off, but using all available gene-level statistics.
 
