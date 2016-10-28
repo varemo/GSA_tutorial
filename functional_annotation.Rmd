@@ -247,7 +247,7 @@ Piano is an R-package for carrying out gene-set analysis (see more info [here](w
 `r sn<-sn+1; paste(sn,". ", sep="")` First we need to import some gene-sets. Load GO-terms from MSigDB:
 
 ```{r}
-gscGO <- loadGSC("GSC/c5.bp.v5.2.symbols.gmt")
+gscGO <- loadGSC("data/GSC/c5.bp.v5.2.symbols.gmt")
 gscGO
 ```
 
