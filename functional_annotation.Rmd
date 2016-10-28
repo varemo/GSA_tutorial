@@ -1,0 +1,343 @@
+---
+title: "Functional annotation and interpretation"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    fig_width: 10
+---
+
+<style type="text/css">
+
+blockquote {
+  background: #ECF8FF;
+  border-left: 10px solid #3989CB;
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+  font-size: 14px;
+}
+
+h1 { 
+  font-size: 25px;
+  margin-top: 1.5cm;
+  margin-bottom: 0.5cm;
+}
+h2 { 
+  font-size: 18px;
+  margin-top: 1cm;
+  margin-bottom: 0.5cm;
+}
+h3 {
+  font-size: 14px;
+  margin-top: 1cm;
+  margin-bottom: 0.5cm;
+}
+
+</style>
+
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = TRUE, tidy=F, eval=T, cache=F)
+qn <- sn <- 0
+```
+
+We will use the following R packages in this exercise:
+```{r, message=FALSE, warning=FALSE, results='hide'}
+library(knitr)
+library(topGO)
+library(biomaRt)
+library(piano)
+```
+
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Start by reading in the differential expression results from the previous exercise:
+```{r readDE}
+diffExpRes <- read.delim("data/results_DE.txt", stringsAsFactors=F)
+head(diffExpRes[,c(1,3,5,8,9)]) # skip some columns
+```
+
+
+> **Question `r qn<-qn+1;qn`:** How many genes are significant at a cutoff of FDR<0.001?
+
+
+Web-based enrichment analysis 
+=============================
+
+We will start by performing overrepresentation analysis (a.k.a. list enrichment analysis, ...) by using Enrichr and DAVID. Both use a scoring method similar to the Hypergeomtric/Fisher's exact test. To do such a test, we need to have a list of interesting (e.g. differentially expressed) genes and a list of the background (also known as universe). However, both Enrichr and DAVID have their own background lists, so we do not need to specify them explicitly. First, let's make a list of interesting genes!  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` You can use the `write.table` function to print the top significant genes to copy paste into some web browser tools:
+```{r, results="hide"}
+sel <- diffExpRes$ensembl_gene_id[diffExpRes$FDR<0.001]
+write.table(sel, quote=F, row.names=F, col.names=F)
+```
+
+DAVID
+-----
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Select and copy the gene list given by the above command and head over to [DAVID](https://david-d.ncifcrf.gov/).
+`r sn<-sn+1; paste(sn,". ", sep="")` Locate *Functional Annotation* in the left menu and click the [more](https://david-d.ncifcrf.gov/helps/functional_annotation.html) link and briefly scroll through that page to get an overview of what the Functional Annotation Tool at DAVID does.
+
+> **Question `r qn<-qn+1;qn`:** What is the alternative to the Fisher Exact P-Value used by DAVID?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now go to the [*Functional Annotation* page](https://david-d.ncifcrf.gov/summary.jsp) and make sure the Upload tab is visible.
+`r sn<-sn+1; paste(sn,". ", sep="")` Paste the copied gene-list, select the correct identifier, and select whether this is a gene list or background (discuss with other students if you are not sure, or ask the instructors). Submit list.
+
+> **Question `r qn<-qn+1;qn`:** Where all gene IDs recognized?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Explore the results. For instance, click on Functional Annotation Clustering at the bottom of the page. This shows related gene-sets clustered together in larger groups for a nicer overview.
+
+> **Question `r qn<-qn+1;qn`:** What seems to be the main functions of the top significant genes? Does this make sense considering the experimental design?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now, rerun DAVID but use gene symbols as input instead. Hint: you need to modify the command above creating the `sel` object.
+
+> **Question `r qn<-qn+1;qn`:** Where all gene IDs recognized?   
+> **Question `r qn<-qn+1;qn`:** Does this list give the same results as using the Ensembl IDs?
+
+Enrichr
+-------
+
+As an alternative to DAVID we can try [Enrichr](http://amp.pharm.mssm.edu/Enrichr/). This page takes human gene symbols as input, so first we need to translate our mouse Ensembl IDs to that. This can be done in many ways, one way is to use the `biomaRt` package (find a user guide [here](http://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html) or type `vignette("biomaRt")`):
+
+```{r eval=T}
+# Use biomaRt to translate the mouse genes into human orthologs:
+# Select the Ensembl BioMart database
+ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
+# Select the mouse dataset and update the Mart object: 
+ensembl <- useDataset("mmusculus_gene_ensembl", mart=ensembl)
+# Make the query:
+bm <- getBM(attributes=c("ensembl_gene_id","hsapiens_homolog_ensembl_gene"), # this is what we want to extract 
+            filters="ensembl_gene_id", # this determines the filter
+            values=sel, # this are the values to filter for (get only the genes in our list)
+            mart=ensembl)
+head(bm)
+```
+
+As you can see, the above code gave us a map between mouse and human ensembl gene IDs. But this is not exactly what we wanted, we need human gene *symbols*.   
+  
+`r sn<-sn+1; paste(sn,". ", sep="")` Change the `attributes` argument to the proper setting. 
+
+Use the function `listAttributes(ensembl)` to see all possible options. Hint: if there are too many options to go through you can use `grep` to pull out the relevant ones, e.g.:
+
+```{r, results="hide"}
+tmp <- listAttributes(ensembl)
+tmp[grep("Human",tmp[,2]),]
+```
+
+If you are working in RStudio you can also use the convenient command `View` and then search for *human*, e.g.:
+
+```{r, eval=F}
+View(listAttributes(ensembl))
+```
+
+Try it also for the `bm` object. For future reference, note that you can also use `listDatasets(ensembl)` to see which datasetes you can choose from, try it! 
+
+> **Question `r qn<-qn+1;qn`:** How many of the genes in our selected list have gene symbols?  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Get familiar with the `duplicated` and `unique` functions:
+
+```{r}
+# A vector to test stuff on:
+tmp <- c(1,2,2,3,4,4,4,5)
+# Get unique elements:
+unique(tmp)
+# Which elements are duplicated?
+duplicated(tmp)
+# How many duplicates are there:
+sum(duplicated(tmp))
+# Which are the duplicated elements:
+tmp[duplicated(tmp)]
+# Which are the unique duplicated elements:
+unique(tmp[duplicated(tmp)])
+```
+
+Make sure you understand how these two functions work and what they do, then move ahead with the following steps and questions:
+
+> **Question `r qn<-qn+1;qn`:** Are there duplicates Ensembl IDs or gene symbols in the list for Enrichr (`bm`)? How can this affect the results that we get?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now, run `getBM` again, this time also adding information about % identity between mouse and human genes. 
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a boxplot of the % identity for our gene list. Hint: try `?boxplot` if you are unsure about this.
+
+> **Question `r qn<-qn+1;qn`:** Looking at the boxplot, are there any reasons to be concerned?   
+> **Question `r qn<-qn+1;qn`:** Which gene in the list has the lowest % identity?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Paste your list of human gene symbols on the Enrichr website. Look at Ontologies > GO Biological Process 2015.
+
+> **Question `r qn<-qn+1;qn`:** Are the results similar to those we got from DAVID?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Look around on the Enrichr page and get familiar with the different results. Look also on the different views, e.g. Table is good to see the actual p-values of the results.
+
+> **Question `r qn<-qn+1;qn`:** What do the edges (links) in the network denote?  
+> **Question `r qn<-qn+1;qn`:** We have this far used a cutoff of FDR<0.001. Try a few different cutoffs and rerun DAVID and Enrichr. How different are the results?  
+> **Question `r qn<-qn+1;qn`:** For the Enrichr and DAVID results so far, can we know whether the identified functions are active/inactive or up/down-regulated in KO vs control? If not, how can we go about to get a clue about that?
+
+
+Gene-set analysis in R
+======================
+
+Visualizing GO-terms with TopGO
+-------------------------------
+
+Above, we have looked at some different types of gene-set collections, but a lot of focus has been on GO-terms.  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Use the internet to learn about what GO-terms are (e.g. [Wikipedia](https://en.wikipedia.org/wiki/Gene_ontology) or [here](http://geneontology.org/page/ontology-structure)).
+
+> **Question `r qn<-qn+1;qn`:** What are the three main domains/ontologies?  
+> **Question `r qn<-qn+1;qn`:** By whom and how are GO-terms maintained/defined/updated?   
+> **Question `r qn<-qn+1;qn`:** What is the evidence code?  
+> **Question `r qn<-qn+1;qn`:** How are GO-terms connected to each other?
+
+We can use e.g. the `topGO` package to visualize gene-set analysis results on the GO hierarchy network ([topGO manual](https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf)).  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Run the code below, it takes a short while to complete. Meanwhile, go through the code and understand what it does.
+
+```{r, message=F, results="hide"}
+# Format for topgo - remove genes without ensembl id:
+d_topgo <- diffExpRes[!is.na(diffExpRes$ensembl_gene_id),]
+rownames(d_topgo) <- d_topgo$ensembl_gene_id
+
+# Create the topGOdata object:
+GOobj <- new("topGOdata",
+             description = "Simple session", # just a name, can be changed
+             ontology = "BP", # set to BP, MF, or CC
+             allGenes = setNames(diffExpRes$FDR, diffExpRes$ensembl_gene_id), # named numeric vector
+             geneSel = function(x) x<0.01, # a function to select genes from the allGenes vector
+             nodeSize = 10, # remove GO-terms with less than this number of genes
+             mapping = "org.Mm.eg.db", # annotation database
+             ID = "ensembl", # gene ID used as names in allGenes vector
+             annot = annFUN.org) 
+# Run GO-term enrichment analysis:
+resultFisher <- runTest(GOobj, algorithm = "classic", statistic = "fisher")
+# Plot results using the GO hierarchical DAG:
+showSigOfNodes(GOobj, score(resultFisher), firstSigNode=15, useInfo ='all')
+```
+
+If you save the plot as a PDF it will be easier to zoom in and read the node text. (Sometimes the plotting misbehaves in RStudio, try running `grid.newpage()`, `plot.new()`, and/or `par(mfcol=c(1,1))` if plotting looks weird.)
+
+> **Question `r qn<-qn+1;qn`:** What are the circles and squares denoting?  
+> **Question `r qn<-qn+1;qn`:** Which is the most significant BP GO-term?  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now make a topGO plot for the top 10 significant Cellular Compartments (CC), based on a gene list using a cutoff of FDR<0.001. It should look like the one below.
+
+```{r, echo=F, message=F, results="hide"}
+# Create the topGOdata object:
+GOobj <- new("topGOdata",
+             description = "Simple session", # just a name, can be changed
+             ontology = "CC", # set to BP, MF, or CC
+             allGenes = setNames(diffExpRes$FDR, diffExpRes$ensembl_gene_id), # named numeric vector
+             geneSel = function(x) x<0.001, # a function to select genes from the allGenes vector
+             nodeSize = 10, # remove GO-terms with less than this number of genes
+             mapping = "org.Mm.eg.db", # annotation database
+             ID = "ensembl", # gene ID used as names in allGenes vector
+             annot = annFUN.org) 
+# Run GO-term enrichment analysis:
+resultFisher <- runTest(GOobj, algorithm = "classic", statistic = "fisher")
+# Plot results using the GO hierarchical DAG:
+showSigOfNodes(GOobj, score(resultFisher), firstSigNode=10, useInfo ='all')
+```
+
+> **Question `r qn<-qn+1;qn`:** Which is the most significant CC GO-term?
+
+
+Piano
+-----
+
+Piano is an R-package for carrying out gene-set analysis (see more info [here](www.sysbio.se/piano)).
+
+`r sn<-sn+1; paste(sn,". ", sep="")` First we need to import some gene-sets. Load GO-terms from MSigDB:
+
+```{r}
+gscGO <- loadGSC("GSC/c5.bp.v5.2.symbols.gmt")
+gscGO
+```
+
+These are annotated with human gene symbols.  
+  
+`r sn<-sn+1; paste(sn,". ", sep="")` Add these IDs to the data:
+
+```{r}
+ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
+ensembl <- useDataset("mmusculus_gene_ensembl", mart=ensembl)
+bm <- getBM(attributes=c("ensembl_gene_id","hsapiens_homolog_associated_gene_name"),
+            filters="ensembl_gene_id",
+            values=diffExpRes$ensembl_gene_id, # note that now we use all genes here!
+            mart=ensembl)
+bm <- bm[bm[,2]%in%unique(unlist(gscGO)),] # filter for genes in the GO gene-set collection
+head(bm)
+```
+
+> **Question `r qn<-qn+1;qn`:** Are there any duplicates in `bm`? How many? What does this mean?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Let's take a simple approach and remove all ENSMUS duplicates in `bm`:
+
+```{r, eval=F}
+bm <- bm[!duplicated(bm[,1]),]
+```
+
+Note that multiple ENSMUS IDs still can map to the same gene symbol!  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Extract the gene-level statistics that we will use:
+
+```{r}
+d_piano <- merge(diffExpRes, bm, by="ensembl_gene_id", all.x=T, sort=F)
+geneNames <- d_piano$hsapiens_homolog_associated_gene_name
+pvals <- d_piano$FDR
+names(pvals) <- geneNames
+logfc <- d_piano$logFC
+names(logfc) <- geneNames
+```
+
+> **Question `r qn<-qn+1;qn`:** How many unique mouse Ensembl IDs could we map to human orthologs? How many unique human orhtologs do we map to?  
+
+First, let's use piano to perform a hypergeometric test, similar to what we did with Enrichr, DAVID, and topGO.  
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Run the following code:
+
+```{r, message=F, warning=F, fig.height=12}
+# Get the gene-list:
+sel <- names(pvals)[pvals<0.001]
+sel <- unique(sel[!is.na(sel)])
+# Run the analysis:
+res <- runGSAhyper(genes=sel, universe=unique(names(pvals)), gsc=gscGO, gsSizeLim=c(20, 200))
+# Visualize results:
+networkPlot(res, class="non", adjusted=T, significance=0.0001, ncharLabel=Inf,
+            nodeSize=c(3,20), edgeWidth=c(1,15), cexLabel=0.7, overlap=20, 
+            scoreColors=c("greenyellow","darkgreen"))
+```
+Here, we use the `networkPlot` function which draws a network for the most significant gene-sets.
+
+> **Question `r qn<-qn+1;qn`:** What do the colors, node-sizes, and edges denote?  
+
+Next, we will use piano to perform gene-set analysis, i.e. not the enrichment of a gene-list based on a cut-off, but using all available gene-level statistics.
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Run piano and plot the results:
+
+```{r, message=F, warning=F, results='hide', fig.height=12}
+gsaRes <- runGSA(-log10(pvals)*sign(logfc), geneSetStat="fgsea", gsc=gscGO, gsSizeLim=c(20, 200))
+
+networkPlot(gsaRes, "distinct", "both", adjusted=T, significance=0.05, ncharLabel=Inf,
+            nodeSize=c(3,15), edgeWidth=c(1,8), cexLabel=0.7, overlap=20,
+            scoreColors=c("red", "orange", "yellow", "blue", "lightblue", "lightgreen"))
+```
+
+talk about gene overlap
+
+pull out and use GO evidence code?
+
+update GO-term GSC?
+
+rerun with:
+gsSizeLim
+hallmarks
+pathways
+
+gene-level heatmap
+
+other R tool?
+
+Session info
+============
+```{r, echo=F}
+sessionInfo()
+```
+
