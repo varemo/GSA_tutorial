@@ -419,11 +419,6 @@ Note that here we scale the rows so the colors will be visualizing the differenc
 `r sn<-sn+1; paste(sn,". ", sep="")` If you have time, do a similar heatmap but for another gene-set of your choice.
 
 
-pull out and use GO evidence code?
-fixa toc float?
-kolla subset av frågor som ska lämnas in? Lämna in kod?
-
-
 Session info
 ============
 This page was generated using the following R session:
