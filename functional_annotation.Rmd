@@ -45,7 +45,7 @@ qn <- sn <- 0
 Setup and load data 
 ===================
 
-The data needed for this exercise should be in a data/ directory in your working directory. You can download the data/ directory with files [here](data.zip).
+The data needed for this exercise is taken from [a similar course](http://scilifelab.github.io/courses/ngsintro/1609/labs/rnaseq_tutorial_in_progress), in particular it comes from [this publication](http://www.nature.com/neuro/journal/v19/n7/abs/nn.4316.html). We will work with the output from the differential expression analysis of KO vs WT. The data files should be in a data/ subdirectory in your R working directory. You can download the data/ directory with files [here](data.zip).
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
 
@@ -55,6 +55,7 @@ library(knitr)
 library(topGO)
 library(biomaRt)
 library(piano)
+library(NMF)
 ```
 
 If you are not able to load any of these packages, try to install them, either using `biocLite()` (first you need to run `source("http://www.bioconductor.org/biocLite.R")`) or `install.packages()`. If something fails, try to understand the error message and fix it. If you get stuck, ask for help :)  
@@ -180,8 +181,8 @@ Make sure you understand how these two functions work and what they do, then mov
 > **Question `r qn<-qn+1;qn`:** For the Enrichr and DAVID results so far, can we know whether the identified functions are active/inactive or up/down-regulated in KO vs control? If not, how can we go about to get a clue about that?
 
 
-Gene-set analysis in R
-======================
+Enrichment analysis in R
+========================
 
 Visualizing GO-terms with TopGO
 -------------------------------
@@ -323,7 +324,7 @@ Here, we use the `networkPlot` function which draws a network for the most signi
 
 ### Gene-set analysis
 
-Next, we will use piano to perform gene-set analysis, i.e. not the enrichment of a gene-list based on a cut-off, but using all available gene-level statistics.
+Next, we will use piano to perform gene-set analysis, i.e. not the enrichment of a gene-list based on a cut-off, but using all available gene-level statistics. We will use signed (to keep track of fold-change) -log10-pvalues to rank the gene-sets, i.e. `-log10(pvals)*sign(logfc)`.
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Run piano and plot the results:
 
@@ -335,23 +336,97 @@ networkPlot(gsaRes, "distinct", "both", adjusted=T, significance=0.05, ncharLabe
             scoreColors=c("red", "orange", "yellow", "blue", "lightblue", "lightgreen"))
 ```
 
-talk about gene overlap
+> **Question `r qn<-qn+1;qn`:** Could gene overlap between you gene-sets bias the result interpretation in any way?  
+> **Question `r qn<-qn+1;qn`:** What is the top GO-term affected by down-regulation and up-regulation, respectively?
+
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now run a second GSA, according to the following:
+* This time use the file `data/GSC/c2.cp.v5.2.symbols.gmt`, which contains pathway gene-sets from MSigDB, as a gene-set collection (load it with `loadGSC()`). 
+* This time use the mean method (option `geneSetStat="mean"`) instead of fgsea. 
+* Use only gene-sets containing 10-100 genes.
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Plot the results using a network plot, play around with the options until you think it looks nice and presents the results from the GSA in a good way.
+
+For example it could look something similar to this:
+```{r, message=F, warning=F, results='hide', echo=F, fig.height=12}
+gscCP <- loadGSC("data/GSC/c2.cp.v5.2.symbols.gmt")
+gsaResCP <- runGSA(-log10(pvals)*sign(logfc), geneSetStat="mean", gsc=gscCP, gsSizeLim=c(10,100))
+networkPlot(gsaResCP, "distinct", "both", adjusted=T, significance=0.05, ncharLabel=Inf,
+            nodeSize=c(5,25), edgeWidth=c(1,8), cexLabel=0.7, overlap=5,
+            scoreColors=c("red", "orange", "yellow", "blue", "lightblue", "lightgreen"))
+```
+
+> **Question `r qn<-qn+1;qn`:** Are these results in line with previous results we have seen in this exercise? Do you feel there is a consensus pattern?
+
+It is always good to go back to the gene-level while looking at your final GSA results. Here we will use a heatmap for visualizing gene-level data for selected gene-sets (using one of *many* heatmap functions available for R).
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Let's do so for a specific gene-set:
+
+```{r}
+# Get genes for a specific gene-set:
+selGenes <- names(geneSetSummary(gsaRes, "GO_STEROID_BIOSYNTHETIC_PROCESS")$geneLevelStats)
+
+# Merge with the diffexp result table:
+selTab <- merge(cbind(selGenes), d_piano[,c(1,3,5,9,10)], 
+                by.x=1, by.y="hsapiens_homolog_associated_gene_name", all.x=T)
+selTab$log10FDR <- -log10(selTab$FDR)*sign(selTab$logFC)
+# Display this table:
+kable(selTab)
+```
+
+> **Question `r qn<-qn+1;qn`:** Does the table look like you expect it to?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Now, let's fetch the count data for these genes and make a heatmap of all the information we have collected:
+
+```{r, fig.height=12, dpi=600}
+# Read in the count data:
+tableCounts <- read.table(file="data/tableCounts_with_location.tab", sep="\t", header=TRUE, skip=1)
+rownames(tableCounts) <- tableCounts[,1]
+tableCounts <- tableCounts[,7:12]
+colnames(tableCounts) <- c("KO_1","KO_2", "KO_3", "WT_1", "WT_2", "WT_3");
+
+# Merge count data with the selTab:
+selTab <- merge(selTab, tableCounts, by.x="ensembl_gene_id", by.y=0, all.x=T)
+
+# Plot a heatmap:
+# Row annotation:
+rowann <- list(Significant=ifelse(selTab$FDR<0.05,"yes","no"), Regulation=ifelse(selTab$logFC>0,"Up","Down"))
+rowannCol <- list(Significant=c("black","green"), Regulation=c("blue","red"))
+# Row labels:
+rowlabs <- selTab$mgi_symbol
+rowlabs[duplicated(rowlabs)] <- paste(rowlabs[duplicated(rowlabs)]," ")
+# Plot:
+aheatmap(selTab[,7:12], scale="row", annRow=rowann, annColors=rowannCol, 
+         labRow=rowlabs,
+         txt=selTab[,7:12])
+```
+
+Note that here we scale the rows so the colors will be visualizing the difference for each gene specifically, but is not comparable across genes. Therefore we also include the actual counts in each heatmap cell.
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a heatmap without the scaling.
+
+> **Question `r qn<-qn+1;qn`:** Does it look "better", what is the drawback/benefit?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Change the row-labels to mouse ENSEMBL IDs.
+
+> **Question `r qn<-qn+1;qn`:** Given the count data for these genes, does the differential expression results make sense, as indicated by the column annotation columns? Any specific genes that you are concerned about?  
+> **Question `r qn<-qn+1;qn`:** Would you say from looking at the heatmap, that in general steroid biosynthesis is down-regulated or up-regulated? Does your answer reflect the GSA results as seen in the network plot above?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` Spot-check some of these genes to see what their functions are (Google search or similar).
+
+> **Question `r qn<-qn+1;qn`:** Are these genes actually involved in steroid biosynthesis? Are you confident enough from the data and analysis results to say anything about how YAP/TAZ knockout affects this biological process?
+
+`r sn<-sn+1; paste(sn,". ", sep="")` If you have time, do a similar heatmap but for another gene-set of your choice.
+
 
 pull out and use GO evidence code?
+fixa toc float?
+kolla subset av frågor som ska lämnas in? Lämna in kod?
 
-update GO-term GSC?
-
-rerun with:
-gsSizeLim
-hallmarks
-pathways
-
-gene-level heatmap
-
-other R tool?
 
 Session info
 ============
+This page was generated using the following R session:
 ```{r, echo=F}
 sessionInfo()
 ```
