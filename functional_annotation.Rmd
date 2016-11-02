@@ -168,7 +168,7 @@ Make sure you understand how these two functions work and what they do, then mov
 > **Question `r qn<-qn+1;qn`:** Are there duplicated Ensembl IDs or gene symbols in the list for Enrichr (`bm`)? How can this affect the results that we get?
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Now, run `getBM` again, this time also adding information about % identity between mouse and human genes. 
-`r sn<-sn+1; paste(sn,". ", sep="")` Make a boxplot of the % identity for our gene list. Hint: try `?boxplot` if you are unsure about this.
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a boxplot of the % identity for our gene list. Hint: try `?boxplot` if you are unsure about this. Try a histogram as well (`hist()`)!
 
 > **Question `r qn<-qn+1;qn`:** Looking at the boxplot, are there any reasons to be concerned?   
 > **Question `r qn<-qn+1;qn`:** Which gene in the list has the lowest % identity?
@@ -422,6 +422,8 @@ aheatmap(selTab[,7:12], scale="row", annRow=rowann, annColors=rowannCol,
 ```
 
 Note that here we scale the rows so the colors will be visualizing the difference for each gene specifically, but is not comparable across genes. Therefore we also include the actual counts in each heatmap cell.
+
+> **Question `r qn<-qn+1;qn`:** Why are the rows and columns reordered?
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Make a heatmap without the scaling.
 
