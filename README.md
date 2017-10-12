@@ -4,8 +4,7 @@
 GSA tutorial link:
 https://varemo.github.io/GSA_tutorial/functional_annotation.html
 
-With answers (don't start here...):
-https://varemo.github.io/GSA_tutorial/functional_annotation_answers.html
+(Suggested answers to the questions are available on request)
 
 ## Developer notes
 
