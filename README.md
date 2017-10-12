@@ -2,7 +2,7 @@
 
 ## User info:
 GSA tutorial link:
-https://varemo.github.io/GSA_tutorial/functional_annotation.html
+https://varemo.github.io/GSA_tutorial
 
 (Suggested answers to the questions are available on request)
 
