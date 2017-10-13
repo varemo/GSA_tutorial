@@ -422,7 +422,13 @@ aheatmap(selTab[,7:12], scale="row", annRow=rowann, annColors=rowannCol,
          txt=selTab[,7:12])
 ```
 
-Note that here we scale the rows so the colors will be visualizing the difference for each gene specifically, but is not comparable across genes. Therefore we also include the actual counts in each heatmap cell.
+Note that here we scale the rows so the colors will be visualizing the difference for each gene specifically, but is not comparable across genes. Therefore we also include the actual counts in each heatmap cell. Also, note that these are raw counts. As an alternative we could have plotted normalized CPMs (counts per million) using the command:
+
+```{r, eval=F}
+cpms <- cpm(calcNormFactors(DGEList(tableCounts), method='TMM'))
+```
+
+Try this if you have time!
 
 > **Question `r qn<-qn+1;qn`:** Why are the rows and columns reordered?
 
