@@ -52,11 +52,11 @@ qn <- sn <- 0
 Setup and load data 
 ===================
 
-The data needed for this exercise is taken from [a similar course](http://scilifelab.github.io/courses/ngsintro/1609/labs/rnaseq_tutorial_in_progress), in particular it comes from [this publication](http://www.nature.com/neuro/journal/v19/n7/abs/nn.4316.html). We will work with the output from the differential expression analysis of KO vs WT. The data files should be in a data/ subdirectory in your R working directory. You can download the data/ directory with files [here](data.zip).  
+The data needed for this exercise is taken from [the RNA-seq exercise](https://scilifelab.github.io/courses/ngsgu/rna_seq/1710/labs/rna_exercise). In particular it comes from [this publication](http://www.nature.com/neuro/journal/v19/n7/abs/nn.4316.html). We will work with the output from the differential expression analysis of KO vs WT. The data files should be in a `data/` subdirectory in your R working directory. You can download the `data/` directory with files [here](data.zip). You can use the files `results_DE.txt` and `tableCounts` that you generated in the RNA-seq exercise, or use the ones availabel in the `data.zip` file. They should be the same :-)
 
-The idea is that you should go through all the steps in this tutorial and keep track of your code and plots using Rmarkdown. Also include comments and answers to questions in this document. Today we will try to generate a PDF file instead of a HTML file, and this will be the report that you should hand in. To do this, you need to modify the Rmarkdown header a bit, see examples [here](http://rmarkdown.rstudio.com/pdf_document_format.html).  
+The idea is that you should go through all the steps in this tutorial and keep track of your code and plots using Rmarkdown. That way, you can include comments and answers to the questions and document your progress.
 
-`r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the data/ directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
+`r sn<-sn+1; paste(sn,". ", sep="")` Make a new directory for this exercise and add the `data/` directory to it. Start R and use `setwd()` to change the working directory to the one you created.  
 
 `r sn<-sn+1; paste(sn,". ", sep="")` We will use the following R packages in this exercise:
 ```{r, message=FALSE, warning=FALSE, results='hide'}
@@ -512,6 +512,8 @@ Note that multiple ENSMUS IDs still can map to the same gene symbol!
 ```{r}
 # merge diffExpRes and bm:
 d_piano <- merge(diffExpRes, bm, by="ensembl_gene_id", all.x=T, sort=F)
+# avoid duplicating gene-level statistics due to Ensembl ID mapping to multiple symbols:
+d_piano <- d_piano[!duplicated(d_piano[,-ncol(d_piano)]),]
 # get geneNames, pvals and logfc:
 geneNames <- d_piano$hsapiens_homolog_associated_gene_name
 pvals <- d_piano$FDR
@@ -637,8 +639,7 @@ It is always good to go back to the gene-level while looking at your final GSA r
 selGenes <- names(geneSetSummary(gsaRes, "GO_STEROID_BIOSYNTHETIC_PROCESS")$geneLevelStats)
 
 # Merge with the diffexp result table:
-selTab <- merge(cbind(selGenes), d_piano[,c(1,3,5,9,10)], 
-                by.x=1, by.y="hsapiens_homolog_associated_gene_name", all.x=T)
+selTab <- d_piano[d_piano$hsapiens_homolog_associated_gene_name%in%selGenes, c(1,3,5,9,10)]
 selTab$log10FDR <- -log10(selTab$FDR)*sign(selTab$logFC)
 # Display this table:
 kable(selTab)
@@ -655,7 +656,7 @@ Yes, a visual inspection shows that the mapping is correct.
 
 ```{r, fig.height=12, dpi=600}
 # Read in the count data:
-tableCounts <- read.table(file="data/tableCounts_with_location.tab", sep="\t", header=TRUE, skip=1)
+tableCounts <- read.table(file="data/tableCounts", sep="\t", header=TRUE, skip=1)
 rownames(tableCounts) <- tableCounts[,1]
 tableCounts <- tableCounts[,7:12]
 colnames(tableCounts) <- c("KO_1","KO_2", "KO_3", "WT_1", "WT_2", "WT_3");
@@ -727,7 +728,7 @@ aheatmap(selTab[,7:12], scale="row", annRow=rowann, annColors=rowannCol,
 
 <table class="answer"><tr><td class="answer">
 **Answer:** 
-These are the genes belonging to GO_STEROID_BIOSYNTHETIC_PROCESS, which was shown to be affected by down-regulation in the gene-set analysis. Here we can see that a high portion of the genes are signifcant, and that the vast majority of significant genes are in fact down-regulated. Looking at the count data (the actual heatmao) one can alos see a pattern of blue to the left (KO) and red to the right (WT), indicating a lower expression of these genes in the KO:s.
+These are the genes belonging to GO_STEROID_BIOSYNTHETIC_PROCESS, which was shown to be affected by down-regulation in the gene-set analysis. Here we can see that a high portion of the genes are signifcant, and that the vast majority of significant genes are in fact down-regulated. Looking at the count data (the actual heatmap) one can also see a pattern of blue to the left (KO) and red to the right (WT), indicating a lower expression of these genes in the KO:s.
 </td></tr></table><br> 
 
 > **Question `r qn<-qn+1;qn`:** Would you say from looking at the heatmap, that in general steroid biosynthesis is down-regulated or up-regulated? Does your answer reflect the GSA results as seen in the network plot above?
