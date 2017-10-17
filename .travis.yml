@@ -8,4 +8,7 @@ before_install:
   - docker ps -a
   
 script:
-  - R
+  - echo 'rmarkdown::render("functional_annotation.Rmd")' | R --vanilla
+  
+# push output to gh-pages
+
