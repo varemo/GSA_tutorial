@@ -1,3 +1,5 @@
+https://travis-ci.org/varemo/GSA_tutorial.svg?branch=master
+
 # Gene-set analysis tutorial (appr. 6hours)
 
 ## User info:
