@@ -8,7 +8,7 @@ before_install:
   - docker ps -a
   
 script:
-  - echo 'rmarkdown::render("functional_annotation.Rmd")' | R --vanilla
+  - docker run ngs-course-gu Rscript -e 'rmarkdown::render("functional_annotation.Rmd")'
   
 # push output to gh-pages
 
