@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+  - docker
+  
+before_install:
+  - docker build -t ngs-course-gu .
+  - docker ps -a
+  
+script:
+  - R
