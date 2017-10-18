@@ -410,7 +410,7 @@ Muscle contraction.
 
 <div class="answer"><table class="answer"><tr><td class="answer">
 **Answer:** 
-```{r, echo=T, message=F, results="hide"}
+```{r, echo=T, eval=F}
 # Create the topGOdata object:
 GOobj <- new("topGOdata",
              description = "Simple session", # just a name, can be changed
