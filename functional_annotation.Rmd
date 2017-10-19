@@ -285,7 +285,7 @@ bm[idx[1],]
 </td></tr></table><br></div> 
 
 
-`r sn<-sn+1; paste(sn,". ", sep="")` Paste your list of human gene symbols on the [Enrichr](http://amp.pharm.mssm.edu/Enrichr/) website. Look at Ontologies > GO Biological Process 2015.
+`r sn<-sn+1; paste(sn,". ", sep="")` Paste your list of human gene symbols on the [Enrichr](http://amp.pharm.mssm.edu/Enrichr/) website. Look at Ontologies > GO Biological Process.
 
 > **Question `r qn<-qn+1;qn`:** Are the results similar to those we got from DAVID?
 
@@ -300,7 +300,7 @@ Yes, fairly similar. There is muscle contraction, sterol and lipid biosynthesis,
 
 `r sn<-sn+1; paste(sn,". ", sep="")` Look around on the Enrichr page and get familiar with the different results. Look also on the different views, e.g. Table is good to see the actual p-values of the results.
 
-> **Question `r qn<-qn+1;qn`:** What do the edges (links) in the network view on the Enrichr webpage denote?  
+> **Question `r qn<-qn+1;qn`:** What do the edges (links) in the network view on the Enrichr webpage denote? (Note: The network view is not available for some gene-set collections, try to click on a different tab and gene set collection to find an example of the network view.)  
 
 <div class="answer"><table class="answer"><tr><td class="answer">
 **Answer:** 
