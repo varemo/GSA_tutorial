@@ -6,11 +6,20 @@ services:
   - docker
   
 before_install:
-  - docker build -t ngs-course-gu .
-  - docker ps -a
+  - docker build -t gsa_tutorial .
   
 script:
-  - docker run ngs-course-gu Rscript -e 'rmarkdown::render("functional_annotation.Rmd")'
+  - ls
+  - rm functional_annotation.html
+  - docker run -v $PWD:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
+  - cp functional_annotation.html functional_annotation_answers.html
+  - sed -i -e "s/div.answer { display: none;}/div.answer { display: true;}/g" functional_annotation_answers.html
+  - ls
   
-# push output to gh-pages
+#deploy:
+#  provider: pages
+#  skip_cleanup: true
+#  github_token: $GITHUB_TOKEN # Set in travis-ci.org repo settings and in GitHub user settings
+#  on:
+#    branch: gh-pages
 
