@@ -2,3 +2,4 @@
 .Rhistory
 student_handins/
 *.Rproj*
+.Rproj.user
