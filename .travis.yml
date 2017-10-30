@@ -25,6 +25,7 @@ script:
   # Make a copy and change the html div.answer to be visible
   - cp functional_annotation.html functional_annotation_answers.html
   - sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' functional_annotation_answers.html
+  - ls | grep -v *.html | xargs rm -r
   # The result is a new html plus a copy where the answers are shown
   
 deploy:
