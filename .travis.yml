@@ -1,3 +1,10 @@
+# This should test:
+# - that the docker image can be built from the Docker file
+# - that the R-code in the Rmd file can be run in the docker image
+# - that an html can be generated from the Rmd file in the docker image and passed to the travis file system
+# - that a copy of the html, showing the answers, can be made
+# - push the new html files to github pages
+
 language: general
 
 sudo: required
@@ -6,15 +13,18 @@ services:
   - docker
   
 before_install:
+  # Build docker image from Dockerfile:
   - docker build -t gsa_tutorial .
   
 script:
-  - ls
+  # Remove current html:
   - rm functional_annotation.html
+  # Generate html from rmd in the built docker image:
   - docker run -v $PWD:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
+  # Make a copy and change the html div.answer to be visible
   - cp functional_annotation.html functional_annotation_answers.html
-  #- sed -i -e "s/div.answer { display: none;}/div.answer { display: true;}/g" functional_annotation_answers.html
-  - ls
+  - sed -i -e 's/div.answer { display: none;}/div.answer { display: true;}/g' functional_annotation_answers.html
+  # The result is a new html plus a copy where the answers are shown
   
 #deploy:
 #  provider: pages
