@@ -13,7 +13,7 @@ script:
   - rm functional_annotation.html
   - docker run -v $PWD:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
   - cp functional_annotation.html functional_annotation_answers.html
-  - sed -i -e "s/div.answer { display: none;}/div.answer { display: true;}/g" functional_annotation_answers.html
+  #- sed -i -e "s/div.answer { display: none;}/div.answer { display: true;}/g" functional_annotation_answers.html
   - ls
   
 #deploy:
