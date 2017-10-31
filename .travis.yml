@@ -18,14 +18,11 @@ before_install:
   - docker pull varemo/gsa_tutorial
   
 script:
-  # Remove current html:
-  #- rm functional_annotation.html
   # Generate html from rmd in the built docker image:
-  #- docker run -v $PWD:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
+  - docker run -v $PWD/docker_out:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
   # Make a copy and change the html div.answer to be visible
-  - cp functional_annotation.html functional_annotation_answers.html
-  - sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' functional_annotation_answers.html
-  - ls | grep -v *.html | xargs rm -r
+  - cp docker_out/functional_annotation.html docker_out/functional_annotation_answers.html
+  - sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' docker_out/functional_annotation_answers.html
   # The result is a new html plus a copy where the answers are shown
   
 deploy:
@@ -34,4 +31,6 @@ deploy:
   github_token: $GITHUB_TOKEN # Set in travis-ci.org repo settings and in GitHub user settings
   on:
     branch: master
+  target_branch: gh-pages
+  local_dir: docker_out/ # maybe change this to gh-pages/ and add that as -v in docker mapping
 
