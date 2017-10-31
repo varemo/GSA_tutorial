@@ -18,7 +18,6 @@ before_install:
   - docker pull varemo/gsa_tutorial
   
 script:
-  # Generate html from rmd in the built docker image:
   - docker run -v $PWD/docker_out:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
   # Make a copy and change the html div.answer to be visible
   - cp docker_out/functional_annotation.html docker_out/functional_annotation_answers.html
