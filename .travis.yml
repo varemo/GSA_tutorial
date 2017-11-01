@@ -14,25 +14,21 @@ services:
   
 before_install:
   # Build docker image from Dockerfile:
-  #- docker build -t gsa_tutorial .
-  - docker pull varemo/gsa_tutorial
+  - docker build -t gsa_tutorial .
   
 script:
-  - ls -lh
   # Generate html from rmd in the built docker image:
   - docker run -v $PWD/docker_out:/home/rstudio/docker_out varemo/gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
   # Make a copy and change the html div.answer to be visible
-  - ls -lh docker_out
   - sudo cp docker_out/functional_annotation.html docker_out/functional_annotation_answers.html
   - sudo sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' docker_out/functional_annotation_answers.html
   # The result is a new html plus a copy where the answers are shown
-  - ls -lh docker_out
   
 deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN # Set in travis-ci.org repo settings and in GitHub user settings
-  local_dir: docker_out # maybe change this to gh-pages/ and add that as -v in docker mapping
+  local_dir: docker_out
   target_branch: gh-pages
   on:
     branch: master
