@@ -47,7 +47,7 @@ div.answer { display: none;}
 
 
 ```{r setup, include=F}
-knitr::opts_chunk$set(echo = TRUE, tidy=F, eval=T, cache=F)
+knitr::opts_chunk$set(echo = TRUE, tidy=F, eval=F, cache=F)
 qn <- sn <- 0
 ```
 
@@ -69,6 +69,7 @@ library(piano)
 library(NMF)
 library(org.Mm.eg.db)
 library(Rgraphviz)
+library(edgeR)
 ```
 
 If you are not able to load any of these packages, try to install them, either using `biocLite()` (first you need to run `source("http://www.bioconductor.org/biocLite.R")`) or `install.packages()`. If something fails, try to understand the error message and fix it. If you get stuck, ask for help :)  
@@ -166,7 +167,7 @@ Enrichr
 
 As an alternative to DAVID we can try [Enrichr](http://amp.pharm.mssm.edu/Enrichr/). This page takes human gene symbols as input, so first we need to translate our mouse Ensembl IDs to that. This can be done in many ways, one way is to use the `biomaRt` package (find a user guide [here](http://bioconductor.org/packages/release/bioc/vignettes/biomaRt/inst/doc/biomaRt.html) or type `vignette("biomaRt")`):
 
-```{r eval=T}
+```{r}
 # Use biomaRt to translate the mouse genes into human orthologs:
 # Select the Ensembl BioMart database
 ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
@@ -702,7 +703,7 @@ aheatmap(selTab[,7:12], scale="row", annRow=rowann, annColors=rowannCol,
 
 Note that here we scale the rows so the colors will be visualizing the difference for each gene specifically, but is not comparable across genes. Therefore we also include the actual counts in each heatmap cell. Also, note that these are raw counts. As an alternative we could have plotted normalized CPMs (counts per million) using the command:
 
-```{r, eval=F}
+```{r}
 cpms <- cpm(calcNormFactors(DGEList(tableCounts), method='TMM'))
 ```
 
