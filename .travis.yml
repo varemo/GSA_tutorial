@@ -24,8 +24,9 @@ script:
   # Make a copy and change the html div.answer to be visible
   - ls -lh docker_out
   - sudo cp docker_out/functional_annotation.html docker_out/functional_annotation_answers.html
-  - sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' docker_out/functional_annotation_answers.html
+  - sudo sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' docker_out/functional_annotation_answers.html
   # The result is a new html plus a copy where the answers are shown
+  - ls -lh docker_out
   
 deploy:
   provider: pages
