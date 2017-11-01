@@ -18,7 +18,7 @@ before_install:
   
 script:
   # Generate html from rmd in the built docker image:
-  - docker run -v $PWD/docker_out:/home/rstudio/docker_out gsa_tutorial Rscript -e 'rmarkdown::render("functional_annotation.Rmd", output_dir="docker_out")'
+  - docker run -v $PWD:/home/rstudio/GSA_tutorial gsa_tutorial Rscript -e 'rmarkdown::render("GSA_tutorial/functional_annotation.Rmd", output_dir="GSA_tutorial/docker_out")'
   # Make a copy and change the html div.answer to be visible
   - sudo cp docker_out/functional_annotation.html docker_out/functional_annotation_answers.html
   - sudo sed -i -e 's/div.answer { \(display:\) none;}/div.answer { \1 true;}/g' docker_out/functional_annotation_answers.html
@@ -32,5 +32,3 @@ deploy:
   target_branch: gh-pages
   on:
     branch: master
-  
-

@@ -12,9 +12,8 @@ RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite(c( \
           'Rgraphviz', \
           'edgeR' \
           ))"
-          
+
 RUN git clone https://github.com/varemo/GSA_tutorial.git
-RUN mv GSA_tutorial/functional_annotation.Rmd .
 RUN mv GSA_tutorial/data .
 RUN rm -r GSA_tutorial
 
