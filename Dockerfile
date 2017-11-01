@@ -10,7 +10,7 @@ RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite(c( \
           'knitr', \
           'org.Mm.eg.db', \
           'Rgraphviz', \
-          'edgeR'
+          'edgeR' \
           ))"
           
 RUN git clone https://github.com/varemo/GSA_tutorial.git
