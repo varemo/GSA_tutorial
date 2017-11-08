@@ -1,5 +1,5 @@
 [![Travis Build Status](https://travis-ci.org/varemo/GSA_tutorial.svg?branch=master)](https://travis-ci.org/varemo/GSA_tutorial)
-[![Docker Build Status](https://img.shields.io/docker/build/varemo/gsa_tutorial.svg)]()
+[![Docker Build Status](https://img.shields.io/docker/build/varemo/gsa_tutorial.svg)](https://hub.docker.com/r/varemo/gsa_tutorial/)
 
 # Gene-set analysis tutorial
 
