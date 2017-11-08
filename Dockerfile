@@ -10,4 +10,4 @@ RUN R -e "library(BiocInstaller); \
                      'edgeR' \
           ))"
 
-ADD GSA_tutorial/data .
+ADD data/ .
