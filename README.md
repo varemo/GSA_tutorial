@@ -34,10 +34,10 @@ Commits are tagged at each course for easy access of the state of the repo at a 
 Travis status badge added to README.md from Travis.
 
 ### Dockerfile
-* Built from rocker/tidyverse image that contains R and Rstudio. 
+* Built from bioconductor/release_core2:R3.4.2_Bioc3.6 image that contains R and Rstudio. 
 * Adds on: 
   - installation of required R packages
-  - data/ directory from GitHub
+  - data/ directory
 In Docker Hub: Create Auto-build from GitHub was selected to get the automated build to work.
 This means that the image can be pulled (without building locally) by `docker pull varemo/GSA_tutorial`.
 At Docker hub one can set build settings. Here a build was set on relevant git tags (i.e. courses).

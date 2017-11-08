@@ -1,19 +1,13 @@
-FROM rocker/tidyverse
+FROM bioconductor/release_core2:R3.4.2_Bioc3.6
 
 WORKDIR /home/rstudio
 
-RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite(c( \
-          'piano', \
-          'topGO', \
-          'biomaRt', \
-          'NMF', \
-          'knitr', \
-          'org.Mm.eg.db', \
-          'Rgraphviz', \
-          'edgeR' \
+RUN R -e "library(BiocInstaller); \
+          biocLite(c('piano', \
+                     'topGO', \
+                     'NMF', \
+                     'org.Mm.eg.db', \
+                     'edgeR' \
           ))"
 
-RUN git clone https://github.com/varemo/GSA_tutorial.git
-RUN mv GSA_tutorial/data .
-RUN rm -r GSA_tutorial
-
+ADD GSA_tutorial/data .
